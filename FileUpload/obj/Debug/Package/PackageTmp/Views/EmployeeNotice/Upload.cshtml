@@ -1,0 +1,154 @@
+﻿@model FileUpload.Models.ViewEmpNotice
+
+@{
+    ViewBag.Title = "Employee Notice Upload";
+}
+
+<style>
+    .btn-file {
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-file input[type=file] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 100%;
+        min-height: 100%;
+        font-size: 100px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        outline: none;
+        background: white;
+        cursor: inherit;
+        display: block;
+    }
+
+</style>
+
+<script>
+
+
+       
+        
+       
+    
+
+
+</script>
+
+<h3 style="margin-left:10px;">@ViewBag.Title</h3>
+<form method="post" action="@Url.Content("~/EmployeeNotice/Upload")" class="distance form-horizontal" enctype="multipart/form-data">
+    @if ((ViewBag.msg != "Successfully saved.") && (ViewBag.msg != null))
+    { 
+        <div class="alert alert-danger text-center">@ViewBag.msg</div>
+    }
+    <div class="alert text-center" id="msgs"></div>
+
+    <div class="col-sm-7">
+        @Html.HiddenFor(mdl => mdl.notice.intTrnEmpNotice)
+        @Html.HiddenFor(mdl => mdl.notice.FileName)
+
+       <div class="form-group">
+            <label class="control-label col-sm-2">Date Effective</label>
+            <div class="col-sm-2">                
+                @Html.TextBoxFor(mdl => mdl.notice.EmpNoticeDate, new { @class = "form-control", Value = Model.notice.EmpNoticeDate.ToShortDateString(), @data_date_format = "mm/dd/yyyy" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-2">Date Received and Time</label>
+            <div class="col-sm-3" > 
+                @*@Html.TextBoxFor(mdl => mdl.notice.EmpReceivedDate, new { @class = "form-control", @value = System.DateTime.Now, @type = "date", @data_date_format = "mm/dd/yyyy" }) *@                                       
+                @Html.TextBoxFor(mdl => mdl.notice.EmpReceivedDate, new { @class = "form-control", Value = Model.notice.EmpNoticeDate.ToShortDateString(), @data_date_format = "mm/dd/yyyy" })
+            </div>
+            <div class="col-sm-3">              
+                @Html.TextBoxFor(mdl => mdl.notice.EmpReceivedTime, new { type = "time", @class = "form-control" })             
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-2">Recipient</label>
+            <div class="col-sm-6">                
+                @Html.TextBoxFor(mdl => mdl.notice.Recipient, new { @class = "form-control"})
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label class="control-label col-sm-2">Doc. Type</label>
+            <div class="col-sm-7">
+                @Html.DropDownListFor(mdl => mdl.notice.intEmpNoticeType, (SelectList)@ViewBag.noticetype, new { @class = "form-control", @style="width: 100%;" })
+            </div>
+        </div>
+
+        <div class="form-group"> 
+            <label class="control-label col-sm-9" style="font-style:italic; color:red; font-size:12px; margin-left:15px;">Note: Special Character  like (!,#,$,%,^,&,* etc.") on the filename is not allowed!</label>
+            <label class="control-label col-sm-10" style="font-style:italic; color:red; font-size:12px; margin-left:55px;">Sample format on naming a file! Ex. Filename_DateToday.pdf / EmployeeNoticeNo1_10232018.pdf</label>    
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-2">Selected file</label>
+            <div class="col-sm-7">                
+                @Html.TextBoxFor(mdl => mdl.notice.OrigFileName, new { @class = "form-control", @readonly = ""})
+            </div>    
+            <span class="btn btn-success btn-file">
+                @*Browse...<input style="margin-top:10px;" type="file" name="file" id="file" onchange="ViewFile();" />*@
+                Browse...<input style="margin-top:10px;" type="file" name="file" id="file" onchange="ViewFile();" />
+            </span>            
+        </div>        
+
+        <div class="form-group">
+            <label class="control-label col-sm-2">Description</label>
+            <div class="col-sm-10">                
+                @Html.TextAreaFor(mdl => mdl.notice.Description, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2">Remarks</label>
+            <div class="col-sm-10">                
+                @Html.TextAreaFor(mdl => mdl.notice.EmpRemarks, new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+
+     <div class="col-sm-7">
+        <button type="submit" class="btn btn-primary pull-right" onsubmit="return validate(this);">Upload Notice</button>
+    </div>
+</form>
+
+@section scripts
+{
+
+    <script type="text/javascript">        
+
+        $(function () {
+            var gpdate = $("#notice_EmpNoticeDate").datepicker();
+            var rpdate = $("#notice_EmpReceivedDate").datepicker();
+        });
+
+        function ViewFile()
+        {
+            var inp = document.getElementById('file').value;
+    
+           // now you can do your checking 
+            if ((/[~#%\$!&@@{}+\|]|\\.\\.|^\\.|\\.$/i.test(inp)) == true) {
+              
+                $('#notice_OrigFileName').val('');
+
+                $('#msgs').removeClass('bg-success');
+                $('#msgs').addClass('bg-danger');
+                $('#msgs').html('Filename contains special characters!').show().fadeOut(8000);
+            }
+            else {
+                $('#notice_OrigFileName').val(inp);              
+                }
+
+
+         
+        }
+       
+    </script>    
+    
+}

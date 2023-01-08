@@ -1,0 +1,66 @@
+﻿@model FileUpload.Models.ComTrailReport
+
+@{
+    ViewBag.Title = ViewBag.Title;
+}
+
+<h3 style="margin-left:10px;">@ViewBag.Title</h3>
+
+<form>
+    <div class="form-group">
+        <div class="col-sm-4">
+            @Html.DropDownListFor(model => model.FileName, (SelectList)@ViewBag.memos, "Select a subject to see details.", new { @class = "form-control", @onchange = "getComTrailDetail()" })
+        </div>
+    </div>
+</form>
+<br />
+<br />
+<div class="col-sm-12">
+    <table class="table table-striped" id="myTable">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Branch</th>
+                <th>Department</th>            
+                <th>Viewed?</th>
+                <th>Date/Time Viewed</th>
+                <th>Downloaded?</th>
+                <th>Date/Time Downloaded</th>
+            </tr>
+        </thead>
+
+    </table>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">        
+
+        $(document).ready(function () {
+            $('#FileName').select2();
+
+            $("#myTable").dataTable();
+        });
+
+        function getComTrailDetail()
+        {
+            $("#myTable").dataTable({                                
+                "ajax": {
+                    url: "@Url.Action("GetComTrailDetails")",
+                    method: "GET",
+                    data: { fileName: $('#FileName').val(), username: '' }
+                },
+                "destroy": true,                
+                "columns": [
+                    { "data": "Username" },
+                    { "data": "BranchName" },
+                    { "data": "DepartmentName" },
+                    { "data": "isViewed" },
+                    { "data": "DateViewed" },
+                    { "data": "isDownloaded" },
+                    { "data": "DateDownloaded" }
+                ]
+            });
+        }
+    </script>   
+}

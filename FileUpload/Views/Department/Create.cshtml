@@ -1,0 +1,22 @@
+﻿@model FileUpload.Models.Department
+
+@{
+    ViewBag.Title = ViewBag.Title;
+}
+
+<h3 style="margin-left:10px;">@ViewBag.Title</h3>
+
+<form method="post" action="@Url.Content("~/Department/Create")"  class="distance">    
+    <div class="col-xs-5">
+        <div class="form-group col-sm-12">
+            <label for="CategoryName">Department Name</label>
+            @Html.TextBoxFor(model => model.DeptName, new { @class = "form-control", @required="required" })            
+            @Html.HiddenFor(model => model.intMstDept)
+        </div>
+        
+        <button type="submit" class="btn btn-success" style="margin-left:15px;">Save Department</button>
+        <a href="@Url.Content("~/Department")" class="btn btn-warning">Back to list</a>
+        <br />
+        <span>@ViewBag.Msg</span>
+    </div>    
+</form>

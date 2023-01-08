@@ -1,0 +1,58 @@
+﻿@model IEnumerable<FileUpload.Models.Department>
+
+@{
+    ViewBag.Title = "Department";
+}
+
+<h3 style="margin-left:10px;">@ViewBag.Title</h3>
+
+<p class="distance">    
+    <a href="@Url.Content("~/Department/Create")" class="btn btn-success" style="margin-left:10px;">Add Department</a>
+</p>
+<table class="table table-striped distance" id="tbl">
+    <thead>
+        <tr>
+            <th>Department</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DeptName)
+                </td>
+                <td>
+                    <a href="@Url.Content("~/Department/Edit/" + item.intMstDept )" >Edit</a> |
+                    <a href="@Url.Content("~/Department/Delete/" + item.intMstDept )" >Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+@section scripts
+{
+    <script type="text/javascript">
+
+        $(function () {
+
+            table = $("#tbl").dataTable({                
+                "bPaginate": true,
+                "bLengthChange": false,
+                "bFilter": true,
+                "bSort": false,
+                "bInfo": false,
+                "oTableTools": {
+                    "sRowSelect": "single",
+                    "sSelectedClass": "selected"
+                }
+            });
+
+        });
+           
+
+    </script>    
+        
+}

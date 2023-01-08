@@ -1,0 +1,59 @@
+﻿@model IEnumerable<FileUpload.Models.Category>
+
+@{
+    ViewBag.Title = "Category";
+}
+
+
+<h3 style="margin-left:10px;">@ViewBag.Title</h3>
+
+<p class="distance">    
+    <a href="@Url.Content("~/Category/Create")" class="btn btn-success" style="margin-left:10px;">Add Category</a>
+</p>
+<table class="table table-striped distance" id="tbl">
+    <thead>
+        <tr>
+            <th>Category Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CategoryName)
+                </td>
+                <td>
+                    <a href="@Url.Content("~/Category/Edit/" + item.CategoryID )" >Edit</a> |
+                    <a href="@Url.Content("~/Category/Delete/" + item.CategoryID )" >Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+@section scripts
+{
+    <script type="text/javascript">
+
+        $(function () {
+
+            table = $("#tbl").dataTable({                
+                "bPaginate": true,
+                "bLengthChange": false,
+                "bFilter": true,
+                "bSort": false,
+                "bInfo": false,
+                "oTableTools": {
+                    "sRowSelect": "single",
+                    "sSelectedClass": "selected"
+                }
+            });
+
+        });
+           
+
+    </script>    
+        
+}

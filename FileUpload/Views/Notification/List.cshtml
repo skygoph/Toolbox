@@ -1,0 +1,49 @@
+﻿@model IEnumerable<FileUpload.Models.Notification>
+
+@{
+    ViewBag.Title = "Announcement Edit";
+}
+
+<h3 style="margin-left:10px;">@ViewBag.Title</h3>
+
+<table class="table table-striped distance" id="tbl">
+    <thead>
+        <tr>                        
+            <th class="col-sm-2 text-center">Anncouncement No.</th>            
+            <th>Subject</th>
+            <th>Description</th>
+            <th class="col-sm-1 text-center">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>                                
+                <td class="text-center">@item.DocNo</td>                
+                <td>@item.Subject</td>
+                <td>@item.NotiDescription</td>
+                <td class="text-center">
+                    <a href="@Url.Content("~/Notification/Edit/" + item.intTrnNotification )" >Edit</a>       &nbsp;&nbsp;
+                    @if (Convert.ToBoolean(Session["isAdmin"]) == true) {
+                        <a href="@Url.Content("~/Notification/Delete/?fileName=" + @item.FileName + "&intId=" + @item.intTrnNotification)" >Delete</a>
+                    }             
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+@section scripts
+{
+    
+    <script type="text/javascript">
+        $(function () {
+
+            table = $("#tbl").dataTable();
+
+        });
+    </script>    
+    
+    
+    
+}

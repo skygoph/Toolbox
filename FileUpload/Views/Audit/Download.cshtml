@@ -1,0 +1,47 @@
+﻿@model IEnumerable<FileUpload.Models.EmpNoticeList>
+
+@{
+    ViewBag.Title = "Audit Report Download";
+}
+
+<h3 style="margin-left:10px;">@ViewBag.Title</h3>
+<table class="table table-striped distance" id="tbl">
+    <thead>
+        <tr>            
+            <th class="col-sm-1 text-center">Notice Date</th>
+            <th class="col-sm-2 text-center">Doc. Type</th>                        
+            <th>Description</th>
+            <th class="col-sm-2 text-center">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>                
+                <td class="text-center">@item.EmpNoticeDate.ToShortDateString()</td>
+                <td class="text-center">@item.NoticeTypeName</td>                
+                <td>@item.Description</td>                
+                <td class="text-center">
+                    <a href="@Url.Content("~/EmployeeNotice/PreviewFile/" + item.FileName )" target="_blank" >Preview</a> &nbsp; | &nbsp;
+                    <a href="@Url.Content("~/EmployeeNotice/DownloadFile/" + item.FileName )" >Download</a> &nbsp; | 
+                    <a href="@Url.Content("~/EmployeeNotice/ViewUploadTaggings/" + item.intTrnEmpNotice )" target="_blank">Report</a>                    
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+@section scripts
+{
+    
+    <script type="text/javascript">
+        $(function () {
+
+            table = $("#tbl").dataTable();
+
+        });
+    </script>    
+    
+    
+    
+}

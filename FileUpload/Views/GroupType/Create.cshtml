@@ -1,0 +1,22 @@
+﻿@model FileUpload.Models.GroupType
+
+@{
+    ViewBag.Title = ViewBag.Title;
+}
+
+<h3 style="margin-left:10px;">@ViewBag.Title</h3>
+
+<form method="post" action="@Url.Content("~/GroupType/Create")"  class="distance">    
+    <div class="col-xs-5">
+        <div class="form-group col-sm-12">
+            <label for="CategoryName">Group Type</label>
+            @Html.TextBoxFor(model => model.GroupTypeName, new { @class = "form-control", @required="required" })            
+            @Html.HiddenFor(model => model.intMstGroupType)
+        </div>
+        
+        <button type="submit" class="btn btn-success" style="margin-left:15px;">Save Group Type</button>
+        <a href="@Url.Content("~/GroupType")" class="btn btn-warning">Back to list</a>
+        <br />
+        <span>@ViewBag.Msg</span>
+    </div>    
+</form>

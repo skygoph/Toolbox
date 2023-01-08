@@ -1,0 +1,28 @@
+﻿@model FileUpload.Models.User
+
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_Login.cshtml";
+}
+
+<link rel="stylesheet" href="@Url.Content("~/Content/signin.css")" />
+
+<div class="container">
+    @using (Html.BeginForm("Login", "User", FormMethod.Post, new { @class = "form-signin", @role = "form" }))
+    {
+        <h2 class="form-signin-heading">Please sign in</h2>
+        <input type="text" class="form-control" placeholder="Username" required autofocus id="Username" name="Username" style="width:300px;" />        
+        <input type="password" class="form-control" placeholder="Password" required id="UserPassword" name="UserPassword" style="width:300px;" />        
+        
+        if ((@ViewBag.ErrorMsg != "") && (@ViewBag.ErrorMsg != null))
+        { 
+            <br />
+            <div class="text-center">
+                <span class="alert alert-danger col-sm-12 text-center"><small>@ViewBag.ErrorMsg</small></span>
+            </div>
+            <br />
+        }
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    }
+</div>
+

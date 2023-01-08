@@ -1,0 +1,258 @@
+﻿@model FileUpload.Models.AudienceMonitoringReport
+
+@{
+    ViewBag.Title = "Reports - Announcements";
+}
+
+<style>
+    .selected {
+        background-color: #4A90BC;
+    }
+    #tbl, #dtFrom_param {
+        cursor: pointer;
+    }
+</style>
+
+<h3 style="margin-left:10px;">@ViewBag.Title</h3>
+
+<form class="form-horizontal" style="margin-left:10px;" role="form">
+    <div class="form-group">
+        <div class="col-sm-4">
+            <table class="table table-bordered table-heading" id="tbl">                
+                <tbody>
+                    <tr>
+                        <td id="1" onclick="Change(this)">Audience Monitoring Detailed Report</td>
+                    </tr>
+                    <tr>                                
+                        <td id="2" onclick="Change(this)">Audience Monitoring Summary</td>
+                    </tr>
+                    <tr>
+                        <td id="3" onclick="Change(this)">Download Trail Report</td> 
+                    </tr> 
+                    <tr>
+                        <td id="4" onclick="Change(this)">Upload Files Summary Report</td>
+                    </tr>                   
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-sm-8">
+            <div class="form-group" id="frm_Subject">
+                <label class="col-sm-3 control-label">Subject</label>
+                <div class="col-sm-8">
+                    @Html.DropDownListFor(mdl => mdl.Subject, (SelectList)@ViewBag.notifs, new { @class = "form-control", @style="width: 100%;" })
+                </div>
+            </div>
+            <div class="form-group" id="frm_User">
+                <label class="col-sm-3 control-label">User</label>
+                <div class="col-sm-8">
+                    @Html.DropDownListFor(mdl => mdl.Username, (SelectList)@ViewBag.users, new { @class = "form-control", @style="width: 100%;" })
+                </div>
+            </div>
+            <div class="form-group" id="frm_dtFrom_params">
+                <label class="col-sm-3 control-label">As of</label>
+                <div class="col-sm-4">
+                    <input type="text" id="dtFrom_param" readonly class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-group" id="upload_User">
+                <label class="col-sm-3 control-label">User</label>
+                <div class="col-sm-8">
+                    @Html.DropDownList("UploadName",null," " ,new { @class = "form-control", @style="width: 100%;" })
+                </div>
+            </div>
+
+            <div class="form-group" id="dtFroms">
+                <label class="col-sm-3 control-label">Date From</label>
+                <div class="col-sm-4">
+                    <input type="text" id="dtFrom" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group" id="dtTos">
+                <label class="col-sm-3 control-label">Date To</label>
+                <div class="col-sm-4">
+                    <input type="text" id="dtTo" class="form-control" />
+                </div>
+            </div>
+
+        </div>
+    </div>            
+</form>
+
+<div class="panel-footer">        
+    <button type="button" class="btn btn-warning btn-lg" onclick="OpenReport();">View Report</button>
+</div> 
+
+<input type="text" id="id_selected" class="hide" />
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#Subject, #Username').select2();
+            HideAllControls();
+            $('#dtFrom_param').datepicker();
+
+            $('#dtFrom').datepicker();
+            $('#dtTo').datepicker();
+
+            $("#Subject").change(function () { GetUsers(); });
+        });
+
+        function Change(node) {
+
+            var j = document.getElementsByClassName("selected");
+            for (var i = 0; i < j.length; i++) {
+                j[i].className = "";
+            }
+            node.className = "selected";
+
+            ShowControls($(node).attr('id'));
+            $('#id_selected').val($(node).attr('id'));
+        }
+
+        function HideAllControls() {
+            $("#Username").html("");
+            $("#Subject").html("");
+            $("#select2-Username-container").html("");
+            $("#select2-Subject-container").html("");
+
+            $('#frm_dtFrom_params').hide();
+            $('#frm_User').hide();
+            $('#frm_Subject').hide();
+            $('#dtFroms').hide();
+            $('#dtTos').hide();
+            $('#upload_User').hide();
+
+        }
+
+        function ShowControls(id) {
+            HideAllControls();
+
+            switch (id) {
+                case "1":
+                case "3":
+                    $('#frm_Subject').show();
+                    $('#frm_User').show();
+                    if (id == "1"){
+                        GetMemoList(false);
+                    }                        
+                    else if (id == "3") {
+                        GetMemoList(true);
+                    }
+
+                    break;
+
+                case "2":                                                        
+                    $('#frm_Subject').show();
+                    $('#frm_dtFrom_params').show();
+                    GetMemoList(true);
+
+                    break;
+                case "4":
+                    $('#dtFroms').show();
+                    $('#dtTos').show();
+                    $('#upload_User').show();
+                    GetMemoList(true);
+                    break;
+
+                //case "3":
+                //    $('#frm_User').show();
+                //    GetUsers();
+                //    break;
+            }
+        }
+
+        function GetUsers() {
+
+            var url = '@Url.Action("GetUser")';
+            var datax = { "fileName": ""};
+
+            datax.fileName = $('#Subject').val();            
+
+            $.get(
+                url,
+                datax,
+                function (data) {
+
+                    $("#Username").html("");
+                    for (var i = 0; i < data.length; i++) {
+                        var item = data[i];
+                        $("#Username").append(
+                            $("<option></option>").val(item.ValueMember).html(item.DisplayMember)
+                        );
+                    };
+
+                });
+
+            $("#Username").prop('selectedIndex', 0);            
+            
+        }
+
+        function GetMemoList(_hasEmptyString) {
+
+            var url = '@Url.Action("GetNotificationList")';
+            var datax = { "hasEmptyString": "" };
+
+            datax.hasEmptyString = _hasEmptyString;
+
+            $.get(
+                url,
+                datax,
+                function (data) {
+
+                    $("#Subject").html("");
+                    for (var i = 0; i < data.length; i++) {
+                        var item = data[i];
+                        $("#Subject").append(
+                            $("<option></option>").val(item.ValueMember).html(item.DisplayMember)
+                        );
+                    };
+
+                });
+
+            $("#Subject").prop('selectedIndex', 0);
+
+        }
+
+        function OpenReport() {
+            var tbl_id = $('#id_selected').val();
+            var strQueryParam = "";
+            var strTitle = "";
+            var hasError = false;
+
+            switch (tbl_id) {
+                case "1"://AMD                    
+                    strQueryParam = "@Url.Content("~/Notification/ViewAMDReport?fileName=")" + $('#Subject').val() + "&Username=" + $('#Username').val() + "";
+                    strTitle = "Audience Monitoring Detailed Report";
+                    break;
+
+                case "2":
+                    strQueryParam = "@Url.Content("~/Notification/ViewAMSReport?fileName=")" + $('#Subject').val() + "&AsofDate=" + $('#dtFrom_param').val().toString("mm-dd-yyyy") + "";
+                    strTitle = "Audience Monitoring Summary";
+                    break;
+                        
+                case "3":
+                    strQueryParam = "@Url.Content("~/Notification/ViewDownloadTrail?fileName=")" + $('#Subject').val() + "&userName=" + $('#Username').val() + "";
+                    strTitle = "Download Trail Report";
+                    break;
+                case "4":
+                    strQueryParam = "@Url.Content("~/Notification/ViewUploadFilesSummaryReport?userID=")" + $('#UploadName').val() + "&DateFrom=" + $('#dtFrom').val() + "&DateTo=" + $('#dtTo').val() + "";
+                    strTitle = "Upload Files Summary Report";
+                    break;
+
+                case "":
+                case "0":
+                case null:
+                    alert("Please select a report type.");
+                    hasError = true;
+
+        }
+
+        if (hasError == false) {
+            var win = window.open(strQueryParam, "_blank");
+            win.document.title = strTitle;
+        }
+    }
+    </script>    
+}

@@ -1,0 +1,79 @@
+﻿@model IEnumerable<FileUpload.Models.ViewDataUserList>
+
+@{
+    ViewBag.Title = ViewBag.Title;
+}
+
+<h3 style="margin-left:10px;">@ViewBag.Title</h3>
+
+@*<p class="distance">    
+    <a href="@Url.Content("~/User/Create")" class="btn btn-success" style="margin-left:10px;">Add User</a>
+</p>*@
+<table class="table table-striped distance" id="tbl">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Group Name</th>
+            <th class="col-sm-1 text-center">is Admin</th>
+            <th class="col-sm-3 text-center">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Username)</td>
+                <td>@Html.DisplayFor(modelItem => item.UserGroupName)</td>
+                <td class="text-center">
+                    @if (item.isAdmin == true){ 
+                        <input type="checkbox" checked disabled />
+                    }
+                    else{
+                        <input type="checkbox" disabled />
+                    }
+                </td>
+                <td class="text-center">
+                    @if (item.Username != Session["sysAdmin"].ToString())
+                    {
+                        @:<a href="@Url.Content("~/User/Edit/" + item.UserID )" >Edit</a> |
+                        @:<a href="@Url.Content("~/User/Delete/" + item.UserID )" >Delete</a>
+                    }
+                    else
+                    {
+                        if (Session["sysAdmin"].ToString() == Session["Username"].ToString())
+                        { 
+                            @:<a href="@Url.Content("~/User/Edit/" + item.UserID )" >Edit</a> |
+                            @:<a href="@Url.Content("~/User/Delete/" + item.UserID )" >Delete</a>
+                        }
+                    }                    
+
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+@section scripts
+{
+    <script type="text/javascript">
+
+        $(function () {
+
+            table = $("#tbl").dataTable({                
+                "bPaginate": true,
+                "bLengthChange": false,
+                "bFilter": true,
+                "bSort": false,
+                "bInfo": false,
+                "oTableTools": {
+                    "sRowSelect": "single",
+                    "sSelectedClass": "selected"
+                }
+            });
+
+        });
+           
+
+    </script>    
+        
+}

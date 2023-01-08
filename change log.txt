@@ -1,0 +1,62 @@
+changes
+
+------------------------------ I N S T A L L E D ------------------------------
+add columns
+	-> tblTrnUplaod
+		* isOverride		bit
+		* OldFileName		nvarchar(250)
+		* OverrideBy		nvarchar(50)
+		* OverrideDateTime	datetime
+		
+modify sp
+	-> [Trn_AddEditUpload]
+
+------------------------------ I N S T A L L E D ------------------------------
+modify sp
+	-> Report_AudienceMonitoringSummary
+	
+modify report
+	-> rptAMD.rpt
+	-> rptAMS.rpt	
+
+------------------------------ I N S T A L L E D ------------------------------
+
+add sp
+	-> Report_AudienceMonitoringDetailed
+	-> Others_GetUserEmpNamefromHRIS
+	-> Report_DownloadTrail
+	-> Report_AudienceMonitoringSummary
+
+------------------------------ I N S T A L L E D ------------------------------
+add column on tblTrnMemo
+	-> intMstDepartment  int
+	
+add SP
+	-> [Mst_GetDeptName]
+	
+modify SP
+	-> [Trn_AddEditMemo]
+	-> Trn_AddEditPolicy
+
+------------------------------ I N S T A L L E D ------------------------------
+modify SP
+	-> [Mst_GetModules]
+
+------------------------------ I N S T A L L E D ------------------------------
+tables
+	added:
+		- tblTrnMemo
+		- tblTrnMemoDetail
+
+
+table types
+	added:
+		- Trn_MemoDetail
+	
+stored procs
+	added:
+		- Trn_AddEditMemo
+	
+	
+	modified:
+		- 

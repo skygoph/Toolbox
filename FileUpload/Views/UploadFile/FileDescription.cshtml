@@ -1,0 +1,119 @@
+﻿@model IEnumerable<FileUpload.Models.Upload>
+
+@{
+    ViewBag.Title = "Upload File Description";
+}
+
+<h3 style="margin-left:10px;">@ViewBag.Title</h3>
+
+<form class="distance form-horizontal">
+    <div class="row col-xs-12">
+
+        <div class="form-group">
+            <label class="control-label col-sm-1">Upload Date</label>
+            <div class="col-sm-1">                
+                <input type="text" class="form-control" value="@ViewBag.dtDate" id="dtDate" readonly="" />
+            </div>
+
+            <div class="col-sm-3 pull-right text-right">
+                <button type="button" class="btn btn-primary" onclick="SaveDescription();">Save Description</button>                            
+                <a href="@Url.Content("~/UploadFile")" class="btn btn-warning">Back to Upload</a>
+            </div>
+        </div>        
+
+        <table class="table table-striped col-sm-12" id="myTable"  style="margin-top:20px;">    
+        <thead>
+            <tr>
+                <th>intTrnUpload</th>
+                <th>CategoryID</th>
+                <th class="col-sm-3">File Name</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+            <tbody>
+                @foreach (var item in Model)
+                { 
+                    <tr>
+                        <td>@item.intTrnUpload</td>
+                        <td>@item.CategoryID</td>
+                        <td>@item.FileName</td>
+                        <td>                    
+                            <textarea id="@item.FileName" style="height:50px; width:100%;" class="form-control" placeholder="File Description/Remarks here..."></textarea>                    
+                        </td>
+                    </tr>
+                }
+            </tbody>    
+        </table>
+        <div class="col-xs-12 text-center">
+            <span id="msg"></span>
+        </div>
+    </div>
+</form>
+
+
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var tbl = $("#myTable").dataTable({
+                "columnDefs": [{
+                    "targets": [0, 1],
+                    "visible": false,
+                    "searchable": false
+                }],
+                "bPaginate": false,
+                "bLengthChange": false,
+                "bFilter": false,
+                "bSort": false,
+                "bInfo": false,
+            });
+        });
+
+        function RemoveItems() {
+            $("#myTable tbody>tr").remove();
+        }
+
+        function SaveDescription() {
+            var url = '@Url.Action("SaveDescription")';
+            var datas = { "upl": [] };            
+            var tbl = $('#myTable').dataTable().fnGetData();
+
+            var sub = { "intTrnUpload": "", "CategoryID": "", "FileName": "", "FileDescription": "", "dataDate": "" };
+
+            for (var i = 0; i < tbl.length; i++)
+            {
+                sub.intTrnUpload = tbl[i][0];
+                sub.CategoryID = tbl[i][1];
+                sub.FileName = tbl[i][2];
+                sub.FileDescription = document.getElementById(tbl[i][2]).value;
+                sub.dataDate = $('#dtDate').val();
+                
+                datas.upl.push(sub);
+                sub = { "intTrnUpload": "", "CategoryID": "", "FileName": "", "FileDescription": "", "dataDate": "" };
+            }
+
+            $.ajax({
+                url: url,
+                data: JSON.stringify(datas),
+                type: 'POST',
+                contentType: 'application/json',
+                dataType: 'json',
+                success: function (result) {
+
+                    if (result.success == "True") {
+                        //window.location.href = '@Url.Content("~/UploadFile")';
+                        RemoveItems();
+                        $('#msg').addClass('alert alert-success col-sm-12');
+                        $('#msg').html(result.msg);
+                    }
+                    else {
+                        alert(result.msg);
+                    }
+
+                }
+            });
+
+        }
+    </script>
+}

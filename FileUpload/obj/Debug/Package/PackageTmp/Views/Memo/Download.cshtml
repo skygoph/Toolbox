@@ -1,0 +1,53 @@
+﻿@model IEnumerable<FileUpload.Models.Memo>
+
+@{
+    ViewBag.Title = "Department Order Download";
+}
+
+<h3 style="margin-left:10px;">@ViewBag.Title</h3>
+
+@*<p class="distance">    
+    <a href="@Url.Content("~/Memo/Create")" class="btn btn-success" style="margin-left:10px;">Add Memo</a>
+</p>*@
+<table class="table table-striped distance" id="tbl">
+    <thead>
+        <tr>            
+            <th class="col-sm-1 text-center">DO Date</th>
+            <th class="col-sm-2 text-center">DO No.</th>            
+            <th>Subject</th>
+            <th>Description</th>
+            <th class="col-sm-2 text-center">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) {
+            <tr>                
+                <td class="text-center">@item.MemoDate.ToShortDateString()</td>
+                <td class="text-center">@item.DocNo</td>                
+                <td>@item.Subject</td>
+                <td>@item.MemoDescription</td>
+                <td class="text-center">
+                    <a href="@Url.Content("~/Memo/PreviewFile/" + item.FileName )" target="_blank" >Preview</a> &nbsp; | 
+                    <a href="@Url.Content("~/Memo/DownloadFile/" + item.FileName )" >Download</a> &nbsp; 
+                    @*<a href="@Url.Content("~/Memo/ViewUploadTaggings/" + item.intTrnMemo)" target="_blank" >Report</a>*@
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+@section scripts
+{
+    
+    <script type="text/javascript">
+        $(function () {
+
+            table = $("#tbl").dataTable();
+
+        });
+    </script>    
+    
+    
+    
+}

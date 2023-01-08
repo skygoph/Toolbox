@@ -1,0 +1,501 @@
+﻿@model FileUpload.Models.ViewEmpNotice
+
+@{
+    ViewBag.Title = "Audit Report Upload";
+}
+
+<style>
+    .btn-file {
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-file input[type=file] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 100%;
+        min-height: 100%;
+        font-size: 100px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        outline: none;
+        background: white;
+        cursor: inherit;
+        display: block;
+    }
+     .ajax-loader {
+  visibility: hidden;
+  background-color: rgba(255,255,255,0.7);
+  position: absolute;
+  z-index: +100 !important;
+  width: 100%;
+  height:100%;
+}
+
+.ajax-loader img {
+  position: relative;
+  top:20%;
+  left:30%;
+}
+</style>
+
+<h3 style="margin-left:10px;">@ViewBag.Title</h3>
+<form method="post" action="@Url.Content("~/EmployeeNotice/Upload")" class="distance form-horizontal" enctype="multipart/form-data">
+   <div class="col-sm-12">
+        <div class="alert text-center" id="msg"></div>
+    </div>
+
+    <div class="col-sm-5">
+        @Html.HiddenFor(mdl => mdl.notice.intTrnEmpNotice)
+        @Html.HiddenFor(mdl => mdl.notice.FileName)
+
+       <div class="form-group">
+            <label class="control-label col-sm-2">Date Effective</label>
+            <div class="col-sm-3">                
+                @*@Html.TextBoxFor(mdl => mdl.notice.EmpNoticeDate, "{0:MM/dd/yyyy}", new { @class = "form-control" })*@
+                @Html.TextBoxFor(mdl => mdl.notice.EmpNoticeDate, new { @class = "form-control", Value = Model.notice.EmpNoticeDate.ToShortDateString(), @data_date_format = "mm/dd/yyyy" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-2">Date Received and Time</label>
+            <div class="col-sm-3" > 
+                @Html.TextBoxFor(mdl => mdl.notice.EmpReceivedDate, new { @class = "form-control", Value = Model.notice.EmpReceivedDate.ToShortDateString(),@readonly = "" })                                        
+            </div>
+            <div class="col-sm-3">              
+                @Html.TextBoxFor(mdl => mdl.notice.EmpReceivedTime, new { @class = "form-control", @readonly = "" })             
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-2">Recipient</label>
+            <div class="col-sm-6">                
+                @Html.TextBoxFor(mdl => mdl.notice.Recipient, new { @class = "form-control", @readonly = "" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-2">Doc. Type</label>
+            <div class="col-sm-7">
+                @Html.DropDownListFor(mdl => mdl.notice.intEmpNoticeType, (SelectList)@ViewBag.noticetype, new { @class = "form-control", @style="width: 100%;" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-2">Deviation Type</label>
+            <div class="col-sm-7">
+                @Html.DropDownListFor(mdl => mdl.notice.intDeviationType, (SelectList)@ViewBag.deviationtype, new { @class = "form-control", @style="width: 100%;" })
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <label class="control-label col-sm-2">Selected file</label>
+            <div class="col-sm-10">                
+                @Html.TextBoxFor(mdl => mdl.notice.OrigFileName, new { @class = "form-control", @readonly = "" })
+            </div>    
+            @*<span class="btn btn-success btn-file">
+                Browse...<input style="margin-top:10px;" type="file" name="file" id="file" onchange="ViewFile();" />
+            </span>            *@
+        </div>        
+
+        <div class="form-group">
+            <label class="control-label col-sm-2">Description</label>
+            <div class="col-sm-10">                
+                @Html.TextAreaFor(mdl => mdl.notice.Description, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-2">Remarks</label>
+            <div class="col-sm-10">                
+                @Html.TextAreaFor(mdl => mdl.notice.EmpRemarks, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-primary pull-right" onclick="OpenModalConfirmation(2);">Save Notice</button>
+    </div>
+
+    <div class="col-sm-7">
+
+        <div>
+            <label style="font-size:12px; font-style:initial;color:red;">Note: Please review first your tagging before saving to avoid failure of unnecessary tags!</label>
+        </div>
+        <table id="tbl" class="table table-bordered table-striped table-heading">
+            <thead>
+                <tr>
+                    <th>intTrnPolicyDetail</th>                          
+                    <th>intMstEmpPersonal</th>
+                    <th>Employee</th>
+              
+                    <th class="col-sm-1">Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <button type="button" class="btn btn-success pull-right" data-toggle="modal" data-target="#myModal">Add item</button>        
+    </div>
+
+     
+        
+   
+     
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Select where to send</h4>
+      </div>
+      <div class="modal-body">
+          <form class="form-horizontal">  
+              
+              <div class="form-group" style="display:none;">
+                <label class="col-sm-3 control-label">Group Name</label>
+                <div class="col-sm-8">
+                    @Html.DropDownList("GroupName",null," " ,new { @class = "form-control", @style="width: 100%;" })
+                </div>
+            </div>
+
+             @* <div class="form-group" style="display:none;">
+                <label class="col-sm-3 control-label">Branch</label>
+                <div class="col-sm-8">
+                    @Html.DropDownListFor(mdl => mdl.BranchCode, (SelectList)@ViewBag.branches, new { @class = "form-control", @style="width: 100%;" })
+                </div>
+            </div>
+
+              <div class="form-group" style="display:none;">
+                <label class="col-sm-3 control-label">Department</label>
+                <div class="col-sm-8">
+                    @Html.DropDownListFor(mdl => mdl.intMstDepartment, (SelectList)@ViewBag.depts , new { @class = "form-control", @style="width: 100%;" })
+                </div>
+            </div>
+
+              <div class="form-group" style="display:none;">
+                <label class="col-sm-3 control-label">Position</label>
+                <div class="col-sm-8">
+                    @Html.DropDownListFor(mdl => mdl.intMstPosition, (SelectList)@ViewBag.pos , new { @class = "form-control", @style="width: 100%;" })
+                </div>
+            </div>*@
+                        
+              <div class="form-group" id="send-id">
+                <label class="col-sm-3 control-label">Employee</label>
+                <div class="col-sm-8">
+                    @Html.DropDownListFor(mdl => mdl.intMstEmpPersonal, (SelectList)@ViewBag.emps, new { @class = "form-control", @style="width: 100%;" })
+                </div>
+            </div> 
+             @* <div class="form-group" style="display:none;">
+                <label class="col-sm-3 control-label">Other Group</label>
+                    <div class="col-sm-8">
+                        @Html.DropDownList("SpecialGroup",null," " ,new { @class = "form-control", @style="width: 100%;" })
+                    </div>
+               </div>*@
+                           
+          </form>        
+      </div>
+      <div class="modal-footer">        
+        <button type="button" class="btn btn-success" onclick="AddItem();"  data-dismiss="modal">Add</button>
+        <button type="button" class="btn btn-warning" onclick=""  data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="myModalConfirmBox" tabindex="-1" role="dialog" aria-labelledby="myModalConfirmationLabel" aria-hidden="true" data-backdrop="false">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalConfimationLabel1"></h4>
+        </div>
+        <div class="modal-body" id="myModalConfimationLabel2">
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-success btn-lg" onclick="SaveRecord();">&nbsp;&nbsp;Yes&nbsp;&nbsp;</button>  
+         <button type="button" class="btn btn-danger btn-lg" data-dismiss="modal">&nbsp;&nbsp;No&nbsp;&nbsp;</button>
+        </div>
+    </div>
+    </div>
+</div>
+
+<div class="ajax-loader">
+  <img src="~/Images/ajax-loader.gif" class="img-responsive" />
+</div>
+
+@section scripts
+{
+
+    <script type="text/javascript">  
+       
+        function OpenModalConfirmation(type) {
+            if (type == 1) {
+                $('#myModalAddItem').modal();
+
+                document.getElementById("myform").reset();
+                $("#Department").empty();
+                $("#Position").empty();
+                $("#Employee").empty();
+            }
+            if (type == 2) {
+                $('#myModalConfimationLabel1').html("Confirmation");
+                $('#myModalConfimationLabel2').html("Are you sure you want to save?");
+                $('#myModalConfirmBox').modal();
+
+            }
+        }
+
+        var table;
+
+        $(function () {
+            var gpdate = $("#notice_EmpNoticeDate").datepicker();
+            //$('#intMstEmpPersonal').select2();
+            $('#BranchCode, #intMstDepartment, #intMstPosition, #intMstEmpPersonal').select2();
+
+            table = $("#tbl").dataTable({
+                "columnDefs": [{
+                    "targets": [0,1],
+                    "visible": false,
+                    "searchable": false
+                }],
+                "bPaginate": false,
+                "bLengthChange": false,
+                "bFilter": false,
+                "bSort": false,
+                "bInfo": false,
+                "oTableTools": {
+                    "sRowSelect": "single",
+                    "sSelectedClass": "selected"
+                }
+            });
+
+            $('#msg').removeClass('active');
+            $('#msg').addClass('hide');
+
+            GetEmployees();
+            //GetDepartments();
+            //GetPositions();
+        });        
+
+        function ViewFile()
+        {
+            var inp = document.getElementById('file').value;
+
+            $('#notice_OrigFileName').val(inp);
+        }
+       
+
+        function GetDepartments() {
+
+            var url = '@Url.Content("~/Memo/GetData")';
+            var datax = { "codeMstBranch": "", "intMstDept": "", "intMstPosition": "", "LookFor": "" };
+
+            //datax.codeMstBranch = $('#BranchCode').val();
+            //datax.intMstDept = $('#intMstDepartment').val() == null ? 0 : $('#intMstDepartment').val();
+            //datax.intMstPosition = $('#intMstPosition').val() == null ? 0 : $('#intMstPosition').val();
+            //datax.LookFor = 'Dept'
+
+            datax.codeMstBranch = "";
+            datax.intMstDept = 0;
+            datax.intMstPosition = 0;
+            datax.LookFor = 'Dept'
+
+            $.get(
+                url,
+                datax,
+                function (data) {
+
+                    $("#intMstDepartment").html("");
+                    for (var i = 0; i < data.length; i++) {
+                        var item = data[i];
+                        $("#intMstDepartment").append(
+                            $("<option></option>").val(item.ValueMember).html(item.DisplayMember)
+                        );
+                    };
+
+                });
+        }
+
+
+        function GetPositions() {
+
+            var url = '@Url.Content("~/Memo/GetData")';
+            var datax = { "codeMstBranch": "", "intMstDept": "", "intMstPosition": "", "LookFor": "" };
+
+            //datax.codeMstBranch = $('#BranchCode').val();
+            //datax.intMstDept = $('#intMstDepartment').val() == null ? 0 : $('#intMstDepartment').val();
+            //datax.intMstPosition = $('#intMstPosition').val() == null ? 0 : $('#intMstPosition').val();
+            //datax.LookFor = 'Positions'
+
+            datax.codeMstBranch = "";
+            datax.intMstDept = 0;
+            datax.intMstPosition = 0;
+            datax.LookFor = 'Positions'
+
+
+            $.get(
+                url,
+                datax,
+                function (data) {
+
+                    $("#intMstPosition").html("");
+                    for (var i = 0; i < data.length; i++) {
+                        var item = data[i];
+                        $("#intMstPosition").append(
+                            $("<option></option>").val(item.ValueMember).html(item.DisplayMember)
+                        );
+                    };
+
+                });
+        }
+
+        function GetEmployees() {
+
+            var url = '@Url.Content("~/Memo/GetData")';
+            var datax = { "codeMstBranch": "", "intMstDept": "", "intMstPosition": "", "LookFor": "" };
+
+            datax.codeMstBranch = "";
+            datax.intMstDept = -1;
+            datax.intMstPosition = -1;
+            datax.LookFor = 'Employees'
+
+            $.get(
+                url,
+                datax,
+                function (data) {
+
+                    $("#intMstEmpPersonal").html("");
+                    for (var i = 0; i < data.length; i++) {
+                        var item = data[i];
+                        $("#intMstEmpPersonal").append(
+                            $("<option></option>").val(item.ValueMember).html(item.DisplayMember)
+                        );
+                    };
+
+                });
+        }
+
+        function AddItem() {
+            //var items = {
+            //    "intTrnEmpNoticeDetail": "", "intGroupNameID": "", "GroupName": "", "BranchCode": "", "BranchName": "", "intMstDepartment": "", "DepartmentName": "",
+            //    "intMstPosition": "", "PositionName": "", "intMstEmpPersonal": "", "EmpName": "", "intOtherGroup": "", "OtherGroup": ""
+            //};
+            var items = {
+                "intTrnEmpNoticeDetail": "", "intMstEmpPersonal": "", "EmpName": ""
+            };
+
+            items.intTrnEmpNoticeDetail = 0;            
+            //items.intGroupNameID = $('#GroupName').val();
+            //items.GroupName = $('#GroupName :selected').text();
+            //items.BranchCode = $('#BranchCode').val();
+            //items.BranchName = $('#BranchCode :selected').text();
+            //items.intMstDepartment = $('#intMstDepartment').val();
+            //items.DepartmentName = $('#intMstDepartment :selected').text();
+            //items.intMstPosition = $('#intMstPosition').val();
+            //items.PositionName = $('#intMstPosition :selected').text();
+            items.intMstEmpPersonal = $('#intMstEmpPersonal').val();
+            items.EmpName = $('#intMstEmpPersonal :selected').text();
+            //items.intOtherGroup = $('#SpecialGroup').val();
+            //items.OtherGroup = $('#SpecialGroup :selected').text();
+
+            $("#tbl").dataTable()
+                .fnAddData([
+                    items.intTrnEmpNoticeDetail,                                   
+                    items.intMstEmpPersonal,
+                    items.EmpName,      
+                    '<a href="javascript:void(0);" onclick="RemoveItem(this);" >Remove</a>'
+                ]);
+
+        }
+
+        function RemoveItem(val) {
+            var nRow = $(val).parents('tr')[0];
+
+            table.fnDeleteRow(nRow);
+
+        }
+
+        function RedirectMe() {
+            window.location.href = '@Url.Action("Upload")';
+        }
+
+        function SaveRecord() {
+            var notice = {
+                "intTrnEmpNotice": "", "intEmpNoticeType": "","intDeviationType": "", "Recipient": "", "EmpNoticeDate": "", "EmpReceivedDate": "", "EmpReceivedTime": "",
+                "Description": "", "EmpRemarks": "","FileName": "", "OrigFileName": "", "EmpNoticeDet": []
+            };
+
+            var det = {
+                "intTrnEmpNoticeDetail": "", "intTrnEmpNotice": "", "intGroupNameID": "", "BranchCode": "",
+                "intMstDepartment": "", "intMstPosition": "", "intMstEmpPersonal": "", "intOtherGroup": ""
+            };
+
+            notice.intTrnEmpNotice = $("#notice_intTrnEmpNotice").val();
+            notice.intEmpNoticeType = $("#notice_intEmpNoticeType").val();
+            notice.Recipient = $("#notice_Recipient").val();
+            notice.EmpNoticeDate = $("#notice_EmpNoticeDate").val();
+            notice.EmpReceivedDate = $("#notice_EmpReceivedDate").val();
+            notice.EmpReceivedTime = $("#notice_EmpReceivedTime").val();
+            notice.Description = $("#notice_Description").val();
+            notice.FileName = $("#notice_FileName").val();
+            notice.OrigFileName = $("#notice_OrigFileName").val();
+            notice.EmpRemarks = $("#notice_EmpRemarks").val();
+            notice.intDeviationType = $("#notice_intDeviationType").val();
+
+            var oTable = $("#tbl").dataTable().fnGetData();
+
+            for (var i = 0; i < oTable.length; i++) {
+                det.intTrnEmpNoticeDetail = oTable[i][0];
+                det.intTrnEmpNotice = notice.intTrnEmpNotice;
+                det.intGroupNameID = ''; 
+                det.BranchCode = '';
+                det.intMstDepartment = '';
+                det.intMstPosition = '';
+                det.intMstEmpPersonal = oTable[i][1];
+                det.intOtherGroup = '';
+                notice.EmpNoticeDet.push(det);
+
+                det = {
+                    "intTrnEmpNoticeDetail": "", "intTrnEmpNotice": "", "intGroupNameID": "", "BranchCode": "",
+                    "intMstDepartment": "", "intMstPosition": "", "intMstEmpPersonal": "", "intOtherGroup": ""
+                };
+            }
+
+            $('#myModalConfirmBox').modal('hide');
+
+            $.ajax({
+                url: '@Url.Action("SendTo")',
+                beforeSend: function () {
+                    $('.ajax-loader').css("visibility", "visible");
+                },
+                data: JSON.stringify(notice),
+                type: 'POST',
+                contentType: 'application/json;',
+                dataType: 'json',
+                success: function (result) {
+
+                    $('#msg').addClass('active');
+                    $('#msg').removeClass('hide');
+
+                    if (result.success == "True") {
+                        $('#msg').removeClass('bg-danger');
+                        $('#msg').addClass('bg-success');
+                        setTimeout('RedirectMe()', 2000);
+                    }
+                    else {
+                        $('#msg').removeClass('bg-success');
+                        $('#msg').addClass('bg-danger');
+                    }
+
+                    $('.ajax-loader').css("visibility", "hidden");
+                    $('#msg').html(result.msg);
+                }
+            });
+
+        }
+    </script>    
+    
+}

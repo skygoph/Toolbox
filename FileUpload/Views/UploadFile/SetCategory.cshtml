@@ -1,0 +1,210 @@
+﻿@model FileUpload.Models.UploadSetCategory
+
+@{
+    ViewBag.Title = "Setup Category";
+}
+
+<h3 style="margin-left:10px;">@ViewBag.Title</h3>
+
+<form class="distance">
+    <div class="col-xs-5">
+        <table class="table table-striped" id="tblFiles">
+        <thead>
+            <tr>            
+                <th class="col-sm-3">File Name</th>            
+                <th class="col-sm-2 text-center">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        
+            @foreach (var item in Model.uplFiles) 
+            { 
+                <tr>
+                    <td>@item.FileName</td>
+                    <td class="text-center"><a href="javascript:void(0);" onclick="setFileName('@item.FileName', '@item.FileSize');">Select</a></td>
+                </tr>
+            }
+
+        </tbody>
+        </table>
+    </div>
+
+    <div class="col-xs-7">
+        <div class="form-group col-sm-12">
+            <label for="UserGroupName" class="col-sm-2">Date Uploaded</label>
+            <div class="col-sm-3">                
+                @Html.TextBoxFor(md => md.dataDate, new { @class = "form-control", @readonly = "", Value = Model.dataDate.ToShortDateString(), @data_date_format = "mm/dd/yyyy" })
+            </div>
+
+            <button type="button" class="btn btn-success pull-right" onclick="Save();" style="margin-left:15px;">Save File Category</button>
+        </div>
+        <div class="form-group col-sm-12">
+            <label for="UserGroupName" class="col-sm-2">Filename</label>
+            <div class="col-sm-10">
+                @Html.TextBoxFor(mdl => mdl.FileName, new { @class = "form-control", @readonly = ""  })
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <label for="UserGroupName" class="col-sm-2">Doc. Title</label>
+            <div class="col-sm-10">
+                @Html.TextBoxFor(mdl => mdl.Subject, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <label for="UserGroupName" class="col-sm-2">Group Type</label>
+            <div class="col-sm-10">
+                @Html.DropDownListFor(mdl => mdl.intMstGroupType, (SelectList)ViewBag.grouptype, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <label for="UserGroupName" class="col-sm-2">Department</label>
+            <div class="col-sm-10">
+                @Html.DropDownListFor(mdl => mdl.intMstDept, (SelectList)ViewBag.dept, new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <label class="col-sm-2">Description</label>            
+            <div class="col-sm-10">
+                @Html.TextAreaFor(md => md.FileDescription, new { @class = "form-control" })
+            </div>
+        </div>
+        @Html.HiddenFor(md => md.FileSize)
+
+        <table class="table table-striped" id="tblCategory">
+        <thead>
+            <tr>
+                <th>Category ID</th>
+                <th>Category</th>            
+                <th class="col-sm-1 text-center">
+                    Allow<br />
+                    <input type="checkbox" id="check-all-allow" onclick="checkAllow();" />
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+        
+            @foreach (var item in Model.catList) 
+            { 
+                <tr>
+                    <td>@item.CategoryID</td>
+                    <td>@item.CategoryName</td>
+                    <td class="text-center">
+                        <input type="checkbox" class="chk-allow" id="allow-@item.CategoryID" />
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+        </table>
+    </div>
+</form>
+
+
+@section scripts
+{
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            var tbl = $('#tblCategory').dataTable({
+                "columnDefs": [{
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false
+                }],
+                "bPaginate": false,
+                "bLengthChange": false,
+                "bFilter": false,
+                "bSort": false,
+                "bInfo": false,
+                "oTableTools": {
+                    "sRowSelect": "single",
+                    "sSelectedClass": "selected"
+                }
+            });
+
+        });
+
+
+        function checkAllow() {
+            $('.chk-allow').prop('checked', $('#check-all-allow').prop('checked'));
+        }
+
+        function setFileName(fname, fsize)
+        {
+            $('#FileName').val(fname);
+            $('#FileSize').val(fsize + "MB");
+        }
+
+        function Save()
+        {
+
+            var uplCat = {
+                "catList": [], "FileName": "", "FileDescription": "", "dataDate": "", "intMstGroupType": "",
+                "intMstDept": "", "Subject": "", "FileSize": ""
+            };
+            var details = { "CategoryID": "", "CategoryName": "" };            
+            
+            uplCat.FileName = $('#FileName').val();
+            uplCat.FileDescription = $('#FileDescription').val();
+            uplCat.dataDate = $('#dataDate').val();
+            uplCat.intMstGroupType = $('#intMstGroupType').val();
+            uplCat.intMstDept = $('#intMstDept').val();
+            uplCat.Subject = $('#Subject').val();
+            uplCat.FileSize = $('#FileSize').val();
+
+            var tbl = $('#tblCategory').dataTable().fnGetData();
+            for (var i = 0; i < tbl.length; i++)
+            {
+
+                var val;
+                val = $('#allow-' + tbl[i][0]).prop("checked");
+                if (val == true)
+                {
+                    details.CategoryID = tbl[i][0];
+                    details.CategoryName = tbl[i][1];
+
+                    uplCat.catList.push(details);
+                    details = { "CategoryID": "", "CategoryName": "" };
+                }
+
+            }
+
+            if (uplCat.FileName == "") {
+                alert("Please select a file.");
+                return;
+            }
+            if (uplCat.catList.length == 0)
+            {
+                alert("Select atleast one(1) category.");
+                return;
+            }
+            if (uplCat.FileDescription == "")
+            {
+                alert("Please fill up File Description.");
+                return;
+            }
+            
+            //proceed saving
+            $.ajax({
+                url: '@Url.Content("~/UploadFile/SetCategory")',
+                 data: JSON.stringify(uplCat),
+                 type: 'POST',
+                 contentType: 'application/json',
+                 dataType: 'json',
+                 success: function (result) {
+
+                     if (result.success == "True") {
+                         window.location.href = '@Url.Content("~/UploadFile/SetCategory")';
+                    }
+                    else {
+                        alert(result.msg);
+                    }
+
+                }
+             });
+
+        }
+    </script>
+    
+}
