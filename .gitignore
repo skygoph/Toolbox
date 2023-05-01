@@ -34,8 +34,11 @@ FileUpload/msbuild.err
 FileUpload/msbuild.wrn
 
 # Visual Studio 2015
-FileUpload/.vs/
+.vs/
 FileUpload/Properties/
+FileUpload/FileUpload*.user
+
+packages/
 
 # upload this manually at deployment.
 FileUpload/Web.config  
